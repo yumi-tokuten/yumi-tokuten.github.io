@@ -224,6 +224,9 @@ textarea.in{resize:vertical;min-height:4.4em}
 .cmp td:first-child{white-space:nowrap;font-weight:700}
 .cmp tr.on td{background:var(--sage-soft)}
 @media (max-width:520px){.cmp td:first-child{white-space:normal}}
+#result{gap:14px}
+.step-card .chosen-in{font-family:var(--display);font-weight:800;font-size:20px;color:var(--cocoa-deep)}
+.step-card.next{background:#fff;border-color:var(--rule-strong)}
 .sign-row{border-bottom:1px dotted var(--rule-strong);padding:10px 0}
 .sign-row span b{font-family:var(--display);color:var(--cocoa)}
 .sign-row span small{display:block;font-size:12.5px;color:var(--muted)}
@@ -291,7 +294,7 @@ textarea.in{resize:vertical;min-height:4.4em}
     <div class="recipe-body">
       <div class="block" id="result"></div>
       <div class="block">
-        <p class="why">チェックがいくつかついたときは、番号がいちばん小さいものを1つ目にしています。モノから始めると、手放したときの変化に気づきやすいからです。1つ目ができたら、次の番号にも進んでみてください。</p>
+        <p class="why">チェックしたものは全部、ここに並びます。いちばん上（番号がいちばん小さいもの）から始めてください。モノから始めると、手放したときの変化に気づきやすいからです。1つ目ができたら、次に進んでみてください。</p>
       </div>
     </div>
   </article>
@@ -387,23 +390,25 @@ textarea.in{resize:vertical;min-height:4.4em}
   var resultEl=document.getElementById('result');
   function update(){
     resultEl.textContent='';
-    var p=-1;
-    for(var i=0;i<ITEMS.length;i++){if(st.ck[i]){p=i;break;}}
-    if(p<0){resultEl.appendChild(h('p',{class:'empty',text:'STEP1でチェックをつけると、ここに「最初に手放すもの」と「今日できる一歩」が出てきます。'}));return;}
-    var it=ITEMS[p];
-    resultEl.appendChild(h('p',{class:'chosen',text:title(p)}));
-    var card=h('div',{class:'step-card'},[
-      h('span',{class:'lab',text:'今日できる最初の一歩'}),
-      h('p',{class:'big',text:it.step}),
-      h('p',{class:'tip',text:it.tip})
-    ]);
-    if(it.howto){card.appendChild(h('div',{class:'howto'},[
-      h('b',{text:'スマホの利用時間の見方'}),
-      h('span',{text:'iPhone：設定 →「スクリーンタイム」→「すべてのアクティビティを確認」'}),
-      h('span',{text:'Android：設定 →「Digital Wellbeing と保護者による使用制限」'}),
-      h('span',{class:'small',text:'※ 2026年10月時点です。機種やバージョンによって、名前が少しちがうことがあります。'})
-    ]));}
-    resultEl.appendChild(card);
+    var picked=[];
+    for(var i=0;i<ITEMS.length;i++){if(st.ck[i])picked.push(i);}
+    if(!picked.length){resultEl.appendChild(h('p',{class:'empty',text:'STEP1でチェックをつけると、ここに「最初に手放すもの」と「今日できる一歩」が出てきます。'}));return;}
+    picked.forEach(function(p,n){
+      var it=ITEMS[p];
+      var card=h('div',{class:'step-card'+(n?' next':'')},[
+        h('span',{class:'lab',text:n?'次はこれ（'+(n+1)+'つ目）':'まずはこれから（1つ目）'}),
+        h('p',{class:'chosen-in',text:title(p)}),
+        h('p',{class:'big',text:'今日できる一歩：'+it.step}),
+        h('p',{class:'tip',text:it.tip})
+      ]);
+      if(it.howto){card.appendChild(h('div',{class:'howto'},[
+        h('b',{text:'スマホの利用時間の見方'}),
+        h('span',{text:'iPhone：設定 →「スクリーンタイム」→「すべてのアクティビティを確認」'}),
+        h('span',{text:'Android：設定 →「Digital Wellbeing と保護者による使用制限」'}),
+        h('span',{class:'small',text:'※ 2026年10月時点です。機種やバージョンによって、名前が少しちがうことがあります。'})
+      ]));}
+      resultEl.appendChild(card);
+    });
   }
 
   document.getElementById('btn-print').addEventListener('click',function(){window.print();});
